@@ -8,6 +8,10 @@
 
 import UIKit
 
+var factHandler: FactHandler = FactHandler(factSet: FactSet())
+var secPerQuestion: Int = 5
+var counter: Double = 0
+
 class ViewController: UIViewController {
 
     @IBOutlet weak var factFrame1: UIView!
@@ -43,33 +47,95 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var nextRoundSuccess: UIButton!
     @IBOutlet weak var nextRoundFail: UIButton!
+    @IBOutlet weak var viewScoreSuccessButton: UIButton!
     
     @IBOutlet weak var timerLabel: UILabel!
     @IBOutlet weak var messageLabel: UILabel!
     
-    let famousBirthdays: FactSet = FactSet()
+   
+    var timer = Timer()
+    
+    var timerInterval: Double = 1.0
+    //let famousBirthdays: FactSet = FactSet()
+   
+   
+    
+    
+    let scoreVCID = "scoreVC"
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        initializeAppObjects()
+        
         canvas()
-        startGame()
+        //initializeGame()
+        //factHandler = FactHandler(factSet: FactSet())
+        //startRound()
     }
     
-    func startGame()
+   
+    
+    func initializeGame()
     {
-        let factHandler = FactHandler(factSet: famousBirthdays)
+        factHandler = FactHandler(factSet: FactSet())
+    }
+    
+    func startRound()
+    {
+        resetAppObjects()
+        factHandler.incrementRound()
         
         let factList = factHandler.getStarterFacts()
-        for fact in factList
-        {
-            print(fact)
-        }
+        //for fact in factList
+        //{
+        //    print(fact)
+        //}
+        
+        print("This is Round: \(factHandler.numberOfRoundsSoFar)")
         
         populateLabelsWithFacts(from: factList)
+        
+        //Start Timer when question is displayed
+        timer = Timer.scheduledTimer(timeInterval: timerInterval, target: self, selector: #selector(ViewController.updateTimer), userInfo: nil, repeats: true)
     }
+    
+    //Timer function to end the question session when the time alotted for each question runs out
+    func updateTimer()
+    {
+        counter -= timerInterval
+        timerLabel.text = getTimeStringFor(seconds: Int(counter))
+        
+        if counter <= 0.0
+        {
+            timer.invalidate() //This pauses the timer
+            timerLabel.text = getTimeStringFor(seconds: 0)
+            
+            //Invalidate buttons 
+            //wait about 2 seconds
+            
+            messageLabel.text = "Tap events to learn more"
+            timerLabel.isHidden = true
+            
+            //check if correct or wrong
+            
+            enableAllButtons(false)
+            enableAllFactButtons(true)
+            
+            if factHandler.numberOfRoundsSoFar < factHandler.roundsPerGame
+            {
+                nextRoundSuccess.isUserInteractionEnabled = true
+                nextRoundSuccess.isHidden = false
+                
+            } else
+            {
+                viewScoreSuccessButton.isUserInteractionEnabled = true
+                viewScoreSuccessButton.isHidden = false
+            }
+            
+        }
+    }
+        
     
     func populateLabelsWithFacts(from factList: [String])
     {
@@ -96,10 +162,24 @@ class ViewController: UIViewController {
         label.text = fact
     }
     
+    func getTimeStringFor(seconds: Int) -> String
+    {
+        let (timerMins, timerSecs) = (seconds/60, seconds%60)
+        
+        var timerSecString = String(timerSecs)
+        
+        if timerSecString.utf8.count == 1
+        {
+            timerSecString = "0" + timerSecString
+        }
+        
+        return "\(timerMins):" + timerSecString
+    }
     
     
     
-    @IBAction func moveFact(_ sender: UIButton)
+    
+    @IBAction func buttonClickEvent(_ sender: UIButton)
     {
         switch sender
         {
@@ -123,9 +203,40 @@ class ViewController: UIViewController {
         case fact2Button: print("test")
         case fact3Button: print("test")
         case fact4Button: print("test")
+        case nextRoundSuccess:
+            factHandler.incrementScore()
+            if factHandler.numberOfRoundsSoFar < factHandler.roundsPerGame
+            {
+                startRound()
+            }else
+            {
+                
+                displayScore()
+            }
+        case viewScoreSuccessButton: displayScore()
+        case nextRoundFail: print("test")
             
         default: print("The default statement in func moveFact() has been executed. This should not be happening. Fix error!")
         }
+    }
+    
+    func displayScore()
+    {
+        let myScoreVC = self.storyboard?.instantiateViewController(withIdentifier: scoreVCID) as! PlayAgainController
+        //myScoreVC.finalScoreLabel.text = "6/6"
+        
+        //print(myScoreVC.finalScoreLabel.text!)
+        present(myScoreVC, animated: true, completion: self.resetAppObjects)
+        //present(<#T##viewControllerToPresent: UIViewController##UIViewController#>, animated: <#T##Bool#>, completion: <#T##(() -> Void)?##(() -> Void)?##() -> Void#>)
+        
+        //startRound()
+    }
+    
+    override func viewDidAppear(_ animated: Bool)
+    {
+        print("\nviewDidAppear Executed")
+        factHandler = FactHandler(factSet: FactSet())
+        startRound()
     }
     
     func enableAllButtons(_ state: Bool)
@@ -138,15 +249,23 @@ class ViewController: UIViewController {
         button4Up.isUserInteractionEnabled     = state
     }
     
-    //@IBAction func moveFact(_ sender: UIButton)
-    //{
-    //    switch sender
-    //    {
-    //    case
-    //    default:
-    //        print("nothing")
-    //    }
-    //}
+    func enableAllSelectedButtons(_ state: Bool)
+    {
+        button1DownSelected.isUserInteractionEnabled   = state
+        button2UpSelected.isUserInteractionEnabled     = state
+        button2DownSelected.isUserInteractionEnabled   = state
+        button3UpSelected.isUserInteractionEnabled     = state
+        button3DownSelected.isUserInteractionEnabled   = state
+        button4UpSelected.isUserInteractionEnabled     = state
+    }
+    
+    func enableAllFactButtons(_ state: Bool)
+    {
+        fact1Button.isUserInteractionEnabled   = state
+        fact2Button.isUserInteractionEnabled   = state
+        fact3Button.isUserInteractionEnabled   = state
+        fact4Button.isUserInteractionEnabled   = state
+    }
    
 
     override func didReceiveMemoryWarning() {
@@ -154,7 +273,7 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    func initializeAppObjects()
+    func resetAppObjects()
     {
         let cornerRadius: CGFloat = 5
         factFrame1.layer.cornerRadius = cornerRadius
@@ -167,12 +286,9 @@ class ViewController: UIViewController {
         factLabel3.text = ""
         factLabel4.text = ""
         
-        //button1DownSelected.isHidden = true
-        //button2UpSelected.isHidden = true
-        //button2DownSelected.isHidden = true
-        //button3UpSelected.isHidden = true
-        //button3DownSelected.isHidden = true
-        //button4UpSelected.isHidden = true
+        enableAllFactButtons(false)
+        enableAllButtons(true)
+        enableAllSelectedButtons(false)
         
         button1Down.isHidden = false
         button2Up.isHidden = false
@@ -181,33 +297,19 @@ class ViewController: UIViewController {
         button3Down.isHidden = false
         button4Up.isHidden = false
         
-        button1Down.isEnabled = true
-        button2Up.isEnabled = true
-        button2Down.isEnabled = true
-        button3Up.isEnabled = true
-        button3Down.isEnabled = true
-        button4Up.isEnabled = true
-        
-        factFrame1.layer.cornerRadius = cornerRadius
-        factFrame2.layer.cornerRadius = cornerRadius
-        factFrame3.layer.cornerRadius = cornerRadius
-        factFrame4.layer.cornerRadius = cornerRadius
-        
-        button1DownSelected.isUserInteractionEnabled = false
-        button2UpSelected.isUserInteractionEnabled = false
-        button2DownSelected.isUserInteractionEnabled = false
-        button3UpSelected.isUserInteractionEnabled = false
-        button3DownSelected.isUserInteractionEnabled = false
-        button4UpSelected.isUserInteractionEnabled = false
-        
         nextRoundSuccess.isHidden = true
         nextRoundFail.isHidden = true
+        viewScoreSuccessButton.isHidden = true
         
-        nextRoundSuccess.isEnabled = false
-        nextRoundFail.isEnabled = false
+        nextRoundSuccess.isUserInteractionEnabled = false
+        nextRoundFail.isUserInteractionEnabled = false
+        viewScoreSuccessButton.isUserInteractionEnabled = false
         
-        timerLabel.text = "0:00"
+        timerLabel.text = getTimeStringFor(seconds: secPerQuestion)
+        timerLabel.isHidden = false
         messageLabel.text = "Shake to complete"
+        
+        counter = Double(secPerQuestion)
     }
 
 

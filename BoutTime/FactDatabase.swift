@@ -41,12 +41,25 @@ struct FactSet
 
 class FactHandler
 {
+    let roundsPerGame: Int = 6
+    var numberOfRoundsSoFar: Int = 0
+    var numberofCorrectAnswers: Int = 0
     var factSet: FactSet
     var randomFactKey: String = ""
     
     init(factSet: FactSet)
     {
         self.factSet = factSet
+    }
+    
+    func incrementRound()
+    {
+        numberOfRoundsSoFar += 1
+    }
+    
+    func incrementScore()
+    {
+        numberofCorrectAnswers += 1
     }
     
     //Throw error 1 here
