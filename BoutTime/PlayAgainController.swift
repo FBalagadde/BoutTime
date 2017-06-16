@@ -14,7 +14,7 @@ class PlayAgainController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        finalScoreLabel.text = "\(factHandler.numberofCorrectAnswers)/\(factHandler.roundsPerGame)"
+        finalScoreLabel.text = "\(factHandler.gameVars.numberofCorrectAnswers)/\(factHandler.gameVars.roundsPerGame)"
 
         // Do any additional setup after loading the view.
     }

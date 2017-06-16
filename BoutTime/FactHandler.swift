@@ -9,57 +9,25 @@
 import Foundation
 import GameKit
 
-var numberOfFacterPerRound: Int = 4
-
-
-struct FactSet
-{
-    let facts: [String: (factDate: String, factURL: String)] =
-    [
-        "Diego Maradona":           ("10-30-1960", "https://en.wikipedia.org/wiki/Diego_Maradona"),
-        "Pele":                     ("10-23-1940", "https://en.wikipedia.org/wiki/Pel%C3%A9"),
-        "Michael Jordan":           ("02-17-1963", "https://en.wikipedia.org/wiki/Michael_Jordan"),
-        "Bob Marley":               ("02-06-1945", "https://en.wikipedia.org/wiki/Bob_Marley"),
-        "Michael Jackson":          ("08-29-1958", "https://en.wikipedia.org/wiki/Michael_Jackson"),
-        "Thomas Edison":            ("02-11-1847", "https://en.wikipedia.org/wiki/Thomas_Edison"),
-        "Nikola Tesla":             ("07-10-1856", "https://en.wikipedia.org/wiki/Nikola_Tesla"),
-        "Steve Jobs":               ("02-24-1955", "https://en.wikipedia.org/wiki/Steve_Jobs"),
-        "Bill Gates":               ("10-28-1955", "https://en.wikipedia.org/wiki/Bill_Gates"),
-        "George Washington":        ("02-22-1732", "https://en.wikipedia.org/wiki/George_Washington"),
-        "Henry Ford":               ("07-30-1863", "https://en.wikipedia.org/wiki/Henry_Ford"),
-        "John D. Rockefeller":      ("07-08-1839", "https://en.wikipedia.org/wiki/John_D._Rockefeller"),
-        "Abraham Lincoln":          ("02-12-1809", "https://en.wikipedia.org/wiki/Abraham_Lincoln"),
-        "Albert Einstein":          ("03-14-1879", "https://en.wikipedia.org/wiki/Albert_Einstein"),
-        "Isaac Newton":             ("12-25-1642", "https://en.wikipedia.org/wiki/Isaac_Newton"),
-        "Wolfgang Amadeus Mozart":  ("01-27-1756", "https://en.wikipedia.org/wiki/Wolfgang_Amadeus_Mozart"),
-        "Richard Feynman":          ("05-11-1918", "https://en.wikipedia.org/wiki/Richard_Feynman"),
-        "Pablo Picasso":            ("10-25-1881", "https://en.wikipedia.org/wiki/Pablo_Picasso"),
-        "Andrew Carnegie":          ("11-25-1835", "https://en.wikipedia.org/wiki/Andrew_Carnegie"),
-        "Barack Obama":             ("08-04-1961", "https://en.wikipedia.org/wiki/Barack_Obama")
-    ]
-}
-
 class FactHandler
 {
-    let roundsPerGame: Int = 6
-    var numberOfRoundsSoFar: Int = 0
-    var numberofCorrectAnswers: Int = 0
-    var factSet: FactSet
+    var factSet: [String: (factDate: String, factURL: String)]
+    var gameVars: VariablesConstants = VariablesConstants()
     var randomFactKey: String = ""
     
-    init(factSet: FactSet)
-    {
+    init(factDictionary factSet: [String: (factDate: String, factURL: String)], gameVars: VariablesConstants){
+        
         self.factSet = factSet
+        self.gameVars = gameVars
     }
     
-    func incrementRound()
-    {
-        numberOfRoundsSoFar += 1
+    //Game Update Methods
+    func incrementRound() {
+        gameVars.numberOfRoundsSoFar += 1
     }
     
-    func incrementScore()
-    {
-        numberofCorrectAnswers += 1
+    func incrementScore(){
+        gameVars.numberofCorrectAnswers += 1
     }
     
     //Throw error 1 here
@@ -87,15 +55,15 @@ class FactHandler
             //Obtain a random fact dictionary from a dictionary that has not yet been selected during this round
             repeat
             {
-                indexOfSelectFact = GKRandomSource.sharedRandom().nextInt(upperBound: factSet.facts.count)
+                indexOfSelectFact = GKRandomSource.sharedRandom().nextInt(upperBound: factSet.count)
                 
-                randomFactKey = Array(factSet.facts.keys)[indexOfSelectFact] //questionSet.triviaQuestions[indexOfSelectFact]
+                randomFactKey = Array(factSet.keys)[indexOfSelectFact] //questionSet.triviaQuestions[indexOfSelectFact]
                 
             } while checkedKeys.contains(randomFactKey)
             checkedKeys.append(randomFactKey) //include the fact key in the gameQuestions array
             
             // If the date string exists, insert it into the return array
-            if let factDate = factSet.facts[randomFactKey]?.factDate
+            if let factDate = factSet[randomFactKey]?.factDate
             {
                 //check if the date is in teh correct format
                 if correctFormatFor(dateString: factDate)
@@ -105,7 +73,7 @@ class FactHandler
                     //keys with invalid URLs may be exported because this is not mandatory for the game to be played
                 }
             }
-        } while (selectedKeys.count < numberOfFacterPerRound && checkedKeys.count < factSet.facts.count)
+        } while (selectedKeys.count < gameVars.numberOfFactsPerRound && checkedKeys.count < factSet.count)
         
         // FIXME: 
         // IF you exit this loop and size of seletFactArray < 4, Throw error and exit
@@ -179,7 +147,6 @@ class FactHandler
         tokens.append(tempString)
         return tokens
     } //end func getStringTokensOf
-
 
 }
 

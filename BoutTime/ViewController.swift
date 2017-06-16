@@ -8,9 +8,13 @@
 
 import UIKit
 
-var factHandler: FactHandler = FactHandler(factSet: FactSet())
-var secPerQuestion: Int = 5
+//Specify the Fact Dictionary for this Game
+let factDictionary = FactSet().famousBirthdays
+
+var factHandler = FactHandler(factDictionary: factDictionary, gameVars: VariablesConstants())
+var secPerQuestion: Int = 60
 var counter: Double = 0
+
 
 class ViewController: UIViewController {
 
@@ -48,10 +52,12 @@ class ViewController: UIViewController {
     @IBOutlet weak var nextRoundSuccess: UIButton!
     @IBOutlet weak var nextRoundFail: UIButton!
     @IBOutlet weak var viewScoreSuccessButton: UIButton!
+    @IBOutlet weak var viewScoreFailButton: UIButton!
     
     @IBOutlet weak var timerLabel: UILabel!
     @IBOutlet weak var messageLabel: UILabel!
     
+    @IBOutlet weak var clickToCompleteButton: UIButton!
    
     var timer = Timer()
     
@@ -69,16 +75,13 @@ class ViewController: UIViewController {
         
         
         canvas()
-        //initializeGame()
-        //factHandler = FactHandler(factSet: FactSet())
-        //startRound()
     }
     
    
     
     func initializeGame()
     {
-        factHandler = FactHandler(factSet: FactSet())
+        factHandler = FactHandler(factDictionary: factDictionary, gameVars: VariablesConstants())
     }
     
     func startRound()
@@ -87,17 +90,39 @@ class ViewController: UIViewController {
         factHandler.incrementRound()
         
         let factList = factHandler.getStarterFacts()
-        //for fact in factList
-        //{
-        //    print(fact)
-        //}
         
-        print("This is Round: \(factHandler.numberOfRoundsSoFar)")
+        print("This is Round: \(factHandler.gameVars.numberOfRoundsSoFar)")
         
         populateLabelsWithFacts(from: factList)
         
         //Start Timer when question is displayed
         timer = Timer.scheduledTimer(timeInterval: timerInterval, target: self, selector: #selector(ViewController.updateTimer), userInfo: nil, repeats: true)
+    }
+    
+    func shakeToComplete()
+    {
+        
+        clickToCompleteButton.isHidden = true
+        clickToCompleteButton.isUserInteractionEnabled = false
+        
+        timer.invalidate() //This pauses the timer
+        timerLabel.text = getTimeStringFor(seconds: Int(counter))
+        
+        messageLabel.text = "Tap events to learn more"
+        timerLabel.isHidden = true
+        
+        enableAllButtons(false)
+        enableAllFactButtons(true)
+        
+        if (checkResult()) // If result is correct
+        {
+            factHandler.incrementScore()
+            displayRoundResult(nextRound: nextRoundSuccess, viewScore: viewScoreSuccessButton)
+            
+        } else // If result is wrong
+        {
+            displayRoundResult(nextRound: nextRoundFail, viewScore: viewScoreFailButton)
+        }
     }
     
     //Timer function to end the question session when the time alotted for each question runs out
@@ -122,20 +147,31 @@ class ViewController: UIViewController {
             enableAllButtons(false)
             enableAllFactButtons(true)
             
-            if factHandler.numberOfRoundsSoFar < factHandler.roundsPerGame
+            if (checkResult()) // If result is correct
             {
-                nextRoundSuccess.isUserInteractionEnabled = true
-                nextRoundSuccess.isHidden = false
+                factHandler.incrementScore()
+                displayRoundResult(nextRound: nextRoundSuccess, viewScore: viewScoreSuccessButton)
                 
-            } else
+            } else // If result is wrong
             {
-                viewScoreSuccessButton.isUserInteractionEnabled = true
-                viewScoreSuccessButton.isHidden = false
+                displayRoundResult(nextRound: nextRoundFail, viewScore: viewScoreFailButton)
             }
-            
         }
     }
-        
+    
+    func displayRoundResult(nextRound: UIButton, viewScore: UIButton)
+    {
+        if factHandler.gameVars.numberOfRoundsSoFar < factHandler.gameVars.roundsPerGame
+        {
+            nextRound.isUserInteractionEnabled = true
+            nextRound.isHidden = false
+        } else
+        {
+            viewScore.isUserInteractionEnabled = true
+            viewScore.isHidden = false
+        }
+    }
+    
     
     func populateLabelsWithFacts(from factList: [String])
     {
@@ -203,44 +239,201 @@ class ViewController: UIViewController {
         case fact2Button: print("test")
         case fact3Button: print("test")
         case fact4Button: print("test")
-        case nextRoundSuccess:
-            factHandler.incrementScore()
-            if factHandler.numberOfRoundsSoFar < factHandler.roundsPerGame
-            {
-                startRound()
-            }else
-            {
-                
-                displayScore()
-            }
+            
+        case nextRoundSuccess: startRound()
+      
+        case nextRoundFail: startRound()
+            
+        case clickToCompleteButton:
+            shakeToComplete()
+            
         case viewScoreSuccessButton: displayScore()
-        case nextRoundFail: print("test")
+            
+        case viewScoreFailButton: displayScore()
+        
             
         default: print("The default statement in func moveFact() has been executed. This should not be happening. Fix error!")
         }
     }
     
+    
     func displayScore()
     {
         let myScoreVC = self.storyboard?.instantiateViewController(withIdentifier: scoreVCID) as! PlayAgainController
-        //myScoreVC.finalScoreLabel.text = "6/6"
-        
-        //print(myScoreVC.finalScoreLabel.text!)
         present(myScoreVC, animated: true, completion: self.resetAppObjects)
-        //present(<#T##viewControllerToPresent: UIViewController##UIViewController#>, animated: <#T##Bool#>, completion: <#T##(() -> Void)?##(() -> Void)?##() -> Void#>)
-        
-        //startRound()
     }
     
-    override func viewDidAppear(_ animated: Bool)
+    func isXLessThanY(x: [String], y: [String]) -> Bool
     {
+        //check if date strings formatted correctly
+        //return error is not
+        if Int(y[0])! > Int(x[0])! //Here we do a force unwrap because we have checked tha tthe date format is authentic
+        {
+            return true
+        }else if Int(y[0])! < Int(x[0])! {
+            return false
+        }else //x[index] == y[index]
+        {
+            if x.count == 1 {
+                return true
+            } else
+            {
+                //remove the first element from the array
+                var xReduced = x; xReduced.remove(at: 0)
+                var yReduced = y; yReduced.remove(at: 0)
+                return isXLessThanY(x: xReduced, y: yReduced)
+            }
+        }
+        
+    }
+    
+    func isXBeforeY(dateX: String, dateY: String) -> Bool
+    {
+        // if not correctFormatFor(dateString: dateString1), return error
+        // if not correctFormatFor(dateString: dateString2), return error
+        
+        //first make sure that date formats are valid or throw error
+        let dateXTokens = getStringTokensOf(string: dateX, delimitChar: "-")
+        let dateYTokens = getStringTokensOf(string: dateY, delimitChar: "-")
+        
+        return isXLessThanY(x: dateXTokens, y: dateYTokens)
+    }
+    
+    // Utility Function for tokenizing delimited strings
+    func getStringTokensOf(string inputString: String, delimitChar: String) -> [String]{
+        
+        var tokens: [String] = []
+        var tempString = ""
+        
+        for letter in inputString.characters {
+            
+            switch String(letter) {
+            case String(delimitChar):
+                tokens.append(tempString)
+                tempString = ""
+            default:
+                tempString += String(letter)
+            }
+        }
+        tokens.append(tempString)
+        return tokens
+    } //end func getStringTokensOf
+    
+    func getDateString(forKey key: String) -> String
+    {
+        if let date = factHandler.factSet[key]?.factDate //factHandler.factSet.facts[key]?.factDate
+        {
+            //print(date)
+            return date
+            
+        }else{
+            // FIXME: send an error
+            return "empty string"
+        }
+    }
+    
+    func changeDateToYYYYMMDD(fromMMDDYYY: String) -> String
+    {
+        var dateTokens = getStringTokensOf(string: fromMMDDYYY, delimitChar: "-")
+        let month = dateTokens[0]
+        let day = dateTokens[1]
+        let year = dateTokens[2]
+        
+        return year + "-" + month + "-" + day //YYYY-MM-DD
+    }
+
+    func getDates(forKeyArray keyArray: [String]) -> [String]
+    {
+        var dateMMDDYYYY: String = ""
+        var date: String = ""
+        var dateArray: [String] = []
+        
+        for key in keyArray
+        {
+            date = getDateString(forKey: key)
+            dateMMDDYYYY = changeDateToYYYYMMDD(fromMMDDYYY: date)
+            dateArray.append(dateMMDDYYYY)
+        }
+        
+        return dateArray
+    }
+    
+    func areDatesInAscendingOrder(dates: [String]) -> Bool
+    {
+        if dates.count == 2
+        {
+            return isXBeforeY(dateX: dates[0], dateY: dates[1])
+        } else {
+            if isXBeforeY(dateX: dates[0], dateY: dates[1])
+            {
+                var datesReduced = dates
+                datesReduced.remove(at: 0)
+                return areDatesInAscendingOrder(dates: datesReduced)
+                
+            }else
+            {
+                return false
+            }
+        }
+    }
+    
+    func getFactFromLabel(label: UILabel) -> String
+    {
+        if let fact = label.text
+        {
+            return fact
+        }else {
+            //throw error
+            return ""
+        }
+    }
+    
+    /////////////////////////////////
+    //get keys from labels -> [keys] : String
+    
+    func gameFacts() -> [String]
+    {
+        var gameFactKeys: [String] = []
+        var fact: String = ""
+        var label: UILabel
+        
+        for index in 1...4
+        {
+            switch index
+            {
+            case 1: label = factLabel1
+            case 2: label = factLabel2
+            case 3: label = factLabel3
+            default: label = factLabel4
+            }
+            
+            //put this in a try catch statement
+            fact = getFactFromLabel(label: label)
+            gameFactKeys.append(fact)
+        }
+        
+        return gameFactKeys
+    }
+    
+    func checkResult() -> Bool
+    {
+        let factKeys = gameFacts()
+        
+        let dateArray = getDates(forKeyArray: factKeys)
+        return areDatesInAscendingOrder(dates: dateArray)
+    }
+    
+    ////////////////////////////////////////////////////////////
+    
+    
+    override func viewDidAppear(_ animated: Bool) {
         print("\nviewDidAppear Executed")
-        factHandler = FactHandler(factSet: FactSet())
+        
+        factHandler = FactHandler(factDictionary: factDictionary, gameVars: VariablesConstants())
         startRound()
     }
     
-    func enableAllButtons(_ state: Bool)
-    {
+    func enableAllButtons(_ state: Bool) {
         button1Down.isUserInteractionEnabled   = state
         button2Up.isUserInteractionEnabled     = state
         button2Down.isUserInteractionEnabled   = state
@@ -249,8 +442,7 @@ class ViewController: UIViewController {
         button4Up.isUserInteractionEnabled     = state
     }
     
-    func enableAllSelectedButtons(_ state: Bool)
-    {
+    func enableAllSelectedButtons(_ state: Bool) {
         button1DownSelected.isUserInteractionEnabled   = state
         button2UpSelected.isUserInteractionEnabled     = state
         button2DownSelected.isUserInteractionEnabled   = state
@@ -259,8 +451,7 @@ class ViewController: UIViewController {
         button4UpSelected.isUserInteractionEnabled     = state
     }
     
-    func enableAllFactButtons(_ state: Bool)
-    {
+    func enableAllFactButtons(_ state: Bool) {
         fact1Button.isUserInteractionEnabled   = state
         fact2Button.isUserInteractionEnabled   = state
         fact3Button.isUserInteractionEnabled   = state
@@ -300,10 +491,15 @@ class ViewController: UIViewController {
         nextRoundSuccess.isHidden = true
         nextRoundFail.isHidden = true
         viewScoreSuccessButton.isHidden = true
+        viewScoreFailButton.isHidden = true
         
         nextRoundSuccess.isUserInteractionEnabled = false
         nextRoundFail.isUserInteractionEnabled = false
         viewScoreSuccessButton.isUserInteractionEnabled = false
+        viewScoreFailButton.isUserInteractionEnabled = false
+        
+        clickToCompleteButton.isUserInteractionEnabled = true
+        clickToCompleteButton.isHidden = false
         
         timerLabel.text = getTimeStringFor(seconds: secPerQuestion)
         timerLabel.isHidden = false
@@ -311,7 +507,5 @@ class ViewController: UIViewController {
         
         counter = Double(secPerQuestion)
     }
-
-
 }
 
