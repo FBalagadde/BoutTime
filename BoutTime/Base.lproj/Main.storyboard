@@ -282,17 +282,6 @@
                                     <action selector="buttonClickEvent:" destination="BYZ-38-t0r" eventType="touchUpInside" id="u0z-sX-zMQ"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="beR-O6-rlT">
-                                <rect key="frame" x="125" y="396" width="165" height="42"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="165" id="6LW-Yg-P86"/>
-                                    <constraint firstAttribute="height" constant="42" id="gRK-50-r0J"/>
-                                </constraints>
-                                <state key="normal" backgroundImage="view_score_success2"/>
-                                <connections>
-                                    <action selector="buttonClickEvent:" destination="BYZ-38-t0r" eventType="touchUpInside" id="BiN-mq-B6e"/>
-                                </connections>
-                            </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="P5S-XP-3in">
                                 <rect key="frame" x="125" y="396" width="165" height="42"/>
                                 <constraints>
@@ -302,6 +291,17 @@
                                 <state key="normal" backgroundImage="view_score_fail"/>
                                 <connections>
                                     <action selector="buttonClickEvent:" destination="BYZ-38-t0r" eventType="touchUpInside" id="EnA-M2-6ER"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="beR-O6-rlT">
+                                <rect key="frame" x="125" y="396" width="165" height="42"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="165" id="6LW-Yg-P86"/>
+                                    <constraint firstAttribute="height" constant="42" id="gRK-50-r0J"/>
+                                </constraints>
+                                <state key="normal" backgroundImage="view_score_success"/>
+                                <connections>
+                                    <action selector="buttonClickEvent:" destination="BYZ-38-t0r" eventType="touchUpInside" id="BiN-mq-B6e"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="22x-CN-vLd">
@@ -495,6 +495,24 @@
             </objects>
             <point key="canvasLocation" x="898.55072463768124" y="122.28260869565219"/>
         </scene>
+        <!--Web View Controller-->
+        <scene sceneID="w8c-mV-F8e">
+            <objects>
+                <viewController storyboardIdentifier="webVC" id="0CF-XD-PxH" customClass="WebViewController" customModule="BoutTime" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="Vbe-ck-zG8"/>
+                        <viewControllerLayoutGuide type="bottom" id="emV-e8-uYj"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="3iS-2N-igV">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="lBI-f3-eHe" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1682.608695652174" y="121.46739130434784"/>
+        </scene>
     </scenes>
     <resources>
         <image name="down_full" width="158" height="457"/>
@@ -509,6 +527,6 @@
         <image name="up_half" width="158" height="229"/>
         <image name="up_half_selected" width="158" height="229"/>
         <image name="view_score_fail" width="558" height="142"/>
-        <image name="view_score_success2" width="558" height="142"/>
+        <image name="view_score_success" width="558" height="142"/>
     </resources>
 </document>

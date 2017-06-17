@@ -21,13 +21,36 @@ class FactHandler
         self.gameVars = gameVars
     }
     
+    func numberOfRoundsSoFar() -> Int{
+        return gameVars.numberOfRoundsSoFar
+    }
+    
+    func roundsPerGame() -> Int {
+        return gameVars.roundsPerGame
+    }
+    
     //Game Update Methods
     func incrementRound() {
         gameVars.numberOfRoundsSoFar += 1
     }
     
+    func beginningOfGame() -> Bool
+    {
+        return gameVars.numberOfRoundsSoFar == 0
+    }
+    
     func incrementScore(){
         gameVars.numberofCorrectAnswers += 1
+    }
+    
+    func setGameState(isGameOver: Bool)
+    {
+        gameVars.gameOver = isGameOver
+    }
+    
+    func isGameOver() -> Bool
+    {
+        return gameVars.gameOver
     }
     
     //Throw error 1 here
@@ -80,74 +103,6 @@ class FactHandler
  
         return selectedKeys
     }
-    
-    /// Utility Function for checking is the date string is in an acceptable formatted strings
-    /// input date string format: MM-DD-YYYY
-    func correctFormatFor(dateString: String) -> Bool
-    {
-        let dateTokens = getStringTokensOf(string: dateString, delimitChar: "-")
-        
-        //var correctDateFormat: Bool = true
-        
-        if dateTokens.count != 3
-        {
-            return false
-        }
-        
-        let year = dateTokens[2]
-        
-        if let yearInt = Int(year)
-        {
-            if yearInt < 0
-            {
-                return false
-            }
-        } else {
-            return false
-        }
-        
-        
-        if year.utf8.count != 4
-        {
-            return false
-        }
-        
-        if let month = Int(dateTokens[0]), let day = Int(dateTokens[1])
-        {
-            if !(month >= 1 && month <= 12 && day >= 1 && day <= 31)
-            {
-                return false
-            }
-        } else
-        {
-            return false
-        }
-        
-        return true
-    }
-    
-    
-    
-    /// Utility Function for tokenizing delimited strings
-    func getStringTokensOf(string inputString: String, delimitChar: String) -> [String]{
-        
-        var tokens: [String] = []
-        var tempString = ""
-        
-        for letter in inputString.characters {
-            
-            switch String(letter) {
-            case String(delimitChar):
-                tokens.append(tempString)
-                tempString = ""
-            default:
-                tempString += String(letter)
-            }
-        }
-        tokens.append(tempString)
-        return tokens
-    } //end func getStringTokensOf
-
 }
 
 

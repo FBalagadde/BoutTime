@@ -68,13 +68,33 @@ class ViewController: UIViewController {
     
     
     let scoreVCID = "scoreVC"
+    let webVCID = "webVC"
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        
-        
         canvas()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        print("\nviewDidAppear Executed")
+        
+        if (roundOver() || factHandler.beginningOfGame()) //!factHandler.isGameOver()
+        {
+            factHandler = FactHandler(factDictionary: factDictionary, gameVars: VariablesConstants())
+            factHandler.setGameState(isGameOver: false)
+            startRound()
+            
+            print("Game not over")
+        }else
+        {
+            print("Game is over")
+        }
+    }
+    
+    func roundOver() -> Bool
+    {
+        return nextRoundFail.isHidden && nextRoundSuccess.isHidden && viewScoreFailButton.isHidden && viewScoreSuccessButton.isHidden
     }
     
    
@@ -91,7 +111,7 @@ class ViewController: UIViewController {
         
         let factList = factHandler.getStarterFacts()
         
-        print("This is Round: \(factHandler.gameVars.numberOfRoundsSoFar)")
+        //print("This is Round: \(factHandler.gameVars.numberOfRoundsSoFar)")
         
         populateLabelsWithFacts(from: factList)
         
@@ -99,9 +119,37 @@ class ViewController: UIViewController {
         timer = Timer.scheduledTimer(timeInterval: timerInterval, target: self, selector: #selector(ViewController.updateTimer), userInfo: nil, repeats: true)
     }
     
+    // Shake to Complete
+    override func motionEnded(_ motion: UIEventSubtype, with event: UIEvent?)
+    {
+        if event?.subtype == UIEventSubtype.motionShake
+        {
+            clickToCompleteButton.isHidden = true
+            clickToCompleteButton.isUserInteractionEnabled = false
+            
+            timer.invalidate() //This pauses the timer
+            timerLabel.text = getTimeStringFor(seconds: Int(counter))
+            
+            messageLabel.text = "Tap events to learn more"
+            timerLabel.isHidden = true
+            
+            enableAllButtons(false)
+            enableAllFactButtons(true)
+            
+            if (checkResult()) // If result is correct
+            {
+                factHandler.incrementScore()
+                displayRoundResult(nextRound: nextRoundSuccess, viewScore: viewScoreSuccessButton)
+                
+            } else // If result is wrong
+            {
+                displayRoundResult(nextRound: nextRoundFail, viewScore: viewScoreFailButton)
+            }
+        }
+    }
+    
     func shakeToComplete()
     {
-        
         clickToCompleteButton.isHidden = true
         clickToCompleteButton.isUserInteractionEnabled = false
         
@@ -161,7 +209,7 @@ class ViewController: UIViewController {
     
     func displayRoundResult(nextRound: UIButton, viewScore: UIButton)
     {
-        if factHandler.gameVars.numberOfRoundsSoFar < factHandler.gameVars.roundsPerGame
+        if factHandler.numberOfRoundsSoFar() < factHandler.roundsPerGame()
         {
             nextRound.isUserInteractionEnabled = true
             nextRound.isHidden = false
@@ -198,21 +246,7 @@ class ViewController: UIViewController {
         label.text = fact
     }
     
-    func getTimeStringFor(seconds: Int) -> String
-    {
-        let (timerMins, timerSecs) = (seconds/60, seconds%60)
-        
-        var timerSecString = String(timerSecs)
-        
-        if timerSecString.utf8.count == 1
-        {
-            timerSecString = "0" + timerSecString
-        }
-        
-        return "\(timerMins):" + timerSecString
-    }
-    
-    
+   
     
     
     @IBAction func buttonClickEvent(_ sender: UIButton)
@@ -234,90 +268,62 @@ class ViewController: UIViewController {
             exchangeLabelFactsFor(label1: factLabel3, label2: factLabel4)
             enableAllButtons(true)
             
-            //Need to wire these towards the end with URL connectivity
-        case fact1Button: print("test")
-        case fact2Button: print("test")
-        case fact3Button: print("test")
-        case fact4Button: print("test")
+        case fact1Button:
+            displayWebForm(url: fetchUrlForFact(inLabel: factLabel1))
+        case fact2Button:
+            displayWebForm(url: fetchUrlForFact(inLabel: factLabel2))
+        case fact3Button:
+            displayWebForm(url: fetchUrlForFact(inLabel: factLabel3))
+        case fact4Button:
+            displayWebForm(url: fetchUrlForFact(inLabel: factLabel4))
             
-        case nextRoundSuccess: startRound()
-      
-        case nextRoundFail: startRound()
+        case nextRoundSuccess, nextRoundFail: startRound()
             
-        case clickToCompleteButton:
-            shakeToComplete()
+        //case clickToCompleteButton:
+        //    shakeToComplete()
             
-        case viewScoreSuccessButton: displayScore()
-            
-        case viewScoreFailButton: displayScore()
-        
+        case viewScoreSuccessButton, viewScoreFailButton: displayScore()
             
         default: print("The default statement in func moveFact() has been executed. This should not be happening. Fix error!")
         }
     }
     
+    func fetchUrlForFact(inLabel label: UILabel) -> String
+    {
+        let fact: String = getFactFromLabel(label: label)
+        return getURLString(forKey: fact)
+    }
+   
+    
+    func displayWebForm(url: String)
+    {
+        webURLGlobal = url
+        
+        let myWebVC = self.storyboard?.instantiateViewController(withIdentifier: webVCID) as! WebViewController
+        present(myWebVC, animated: true, completion: nil)
+    }
+    
     
     func displayScore()
     {
+        factHandler.setGameState(isGameOver: true)
         let myScoreVC = self.storyboard?.instantiateViewController(withIdentifier: scoreVCID) as! PlayAgainController
         present(myScoreVC, animated: true, completion: self.resetAppObjects)
     }
     
-    func isXLessThanY(x: [String], y: [String]) -> Bool
+ 
+    func getURLString(forKey key: String) -> String
     {
-        //check if date strings formatted correctly
-        //return error is not
-        if Int(y[0])! > Int(x[0])! //Here we do a force unwrap because we have checked tha tthe date format is authentic
+        if let url = factHandler.factSet[key]?.factURL //factHandler.factSet.facts[key]?.factDate
         {
-            return true
-        }else if Int(y[0])! < Int(x[0])! {
-            return false
-        }else //x[index] == y[index]
-        {
-            if x.count == 1 {
-                return true
-            } else
-            {
-                //remove the first element from the array
-                var xReduced = x; xReduced.remove(at: 0)
-                var yReduced = y; yReduced.remove(at: 0)
-                return isXLessThanY(x: xReduced, y: yReduced)
-            }
-        }
-        
-    }
-    
-    func isXBeforeY(dateX: String, dateY: String) -> Bool
-    {
-        // if not correctFormatFor(dateString: dateString1), return error
-        // if not correctFormatFor(dateString: dateString2), return error
-        
-        //first make sure that date formats are valid or throw error
-        let dateXTokens = getStringTokensOf(string: dateX, delimitChar: "-")
-        let dateYTokens = getStringTokensOf(string: dateY, delimitChar: "-")
-        
-        return isXLessThanY(x: dateXTokens, y: dateYTokens)
-    }
-    
-    // Utility Function for tokenizing delimited strings
-    func getStringTokensOf(string inputString: String, delimitChar: String) -> [String]{
-        
-        var tokens: [String] = []
-        var tempString = ""
-        
-        for letter in inputString.characters {
+            //make sure URL is not an empty string or else throw error
+            return url
             
-            switch String(letter) {
-            case String(delimitChar):
-                tokens.append(tempString)
-                tempString = ""
-            default:
-                tempString += String(letter)
-            }
+        }else{
+            // FIXME: send an error
+            return "empty string"
         }
-        tokens.append(tempString)
-        return tokens
-    } //end func getStringTokensOf
+    }
     
     func getDateString(forKey key: String) -> String
     {
@@ -332,15 +338,7 @@ class ViewController: UIViewController {
         }
     }
     
-    func changeDateToYYYYMMDD(fromMMDDYYY: String) -> String
-    {
-        var dateTokens = getStringTokensOf(string: fromMMDDYYY, delimitChar: "-")
-        let month = dateTokens[0]
-        let day = dateTokens[1]
-        let year = dateTokens[2]
-        
-        return year + "-" + month + "-" + day //YYYY-MM-DD
-    }
+    
 
     func getDates(forKeyArray keyArray: [String]) -> [String]
     {
@@ -358,24 +356,8 @@ class ViewController: UIViewController {
         return dateArray
     }
     
-    func areDatesInAscendingOrder(dates: [String]) -> Bool
-    {
-        if dates.count == 2
-        {
-            return isXBeforeY(dateX: dates[0], dateY: dates[1])
-        } else {
-            if isXBeforeY(dateX: dates[0], dateY: dates[1])
-            {
-                var datesReduced = dates
-                datesReduced.remove(at: 0)
-                return areDatesInAscendingOrder(dates: datesReduced)
-                
-            }else
-            {
-                return false
-            }
-        }
-    }
+    
+
     
     func getFactFromLabel(label: UILabel) -> String
     {
@@ -426,12 +408,6 @@ class ViewController: UIViewController {
     ////////////////////////////////////////////////////////////
     
     
-    override func viewDidAppear(_ animated: Bool) {
-        print("\nviewDidAppear Executed")
-        
-        factHandler = FactHandler(factDictionary: factDictionary, gameVars: VariablesConstants())
-        startRound()
-    }
     
     func enableAllButtons(_ state: Bool) {
         button1Down.isUserInteractionEnabled   = state

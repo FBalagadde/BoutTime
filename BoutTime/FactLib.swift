@@ -8,12 +8,15 @@
 
 import Foundation
 
+var webURLGlobal: String = ""
+
 struct VariablesConstants
 {
     let roundsPerGame: Int = 6
     let numberOfFactsPerRound: Int = 4
     var numberOfRoundsSoFar: Int = 0
     var numberofCorrectAnswers: Int = 0
+    var gameOver = false
 }
 
 struct FactSet
