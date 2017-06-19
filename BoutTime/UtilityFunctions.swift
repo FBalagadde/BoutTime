@@ -45,6 +45,25 @@ func isXLessThanY(x: [String], y: [String]) -> Bool
     }
 }
 
+func replaceStringChar(forString myString: String, atIndex index: Int, with newChar: String) -> String
+{
+    var newString = ""
+    var count: Int = 0
+    
+    for character in myString.characters
+    {
+        if count == index
+        {
+            newString += newChar
+        }else {
+            newString += String(character)
+        }
+        count += 1
+    }
+    return newString
+} // End func replaceStringChar
+
+
 
 // Utility Function for tokenizing delimited strings
 func getStringTokensOf(string inputString: String, delimitChar: String) -> [String]{

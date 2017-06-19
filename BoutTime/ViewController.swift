@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import AudioToolbox
+import GameKit
 
 //Specify the Fact Dictionary for this Game
 let factDictionary = FactSet().famousBirthdays
@@ -15,6 +17,36 @@ var factHandler = FactHandler(factDictionary: factDictionary, gameVars: Variable
 var secPerQuestion: Int = 60
 var counter: Double = 0
 
+let scoreVCID = "scoreVC"
+let webVCID = "webVC"
+let welcomeVCID = "welcomeVC"
+let reloadVCID = "reloadVC"
+
+
+enum GameStates: String
+{
+    case idle
+    case initialization
+    case timerOn
+    case timerOffNextRound
+    case timerOffViewScore
+    case viewScore
+    case webView
+    case resuming
+    case welcomeScreen
+    case startNewGame
+    case homeButtonWasPressed
+    case applicationReturn
+}
+
+enum Answer: String
+{
+    case correct
+    case wrong
+    case undetermined
+}
+
+var gameState: GameStates = .initialization
 
 class ViewController: UIViewController {
 
@@ -57,28 +89,55 @@ class ViewController: UIViewController {
     @IBOutlet weak var timerLabel: UILabel!
     @IBOutlet weak var messageLabel: UILabel!
     
-    @IBOutlet weak var clickToCompleteButton: UIButton!
+    @IBOutlet weak var newGameButton: UIButton!
+    @IBOutlet weak var rulesButton: UIButton!
+    @IBOutlet weak var splashImageView: UIImageView!
+    
+    @IBOutlet weak var scoreLabel: UILabel!
+  
    
     var timer = Timer()
     
     var timerInterval: Double = 1.0
-    //let famousBirthdays: FactSet = FactSet()
-   
-   
+    
+ 
+    var correctDing: SystemSoundID = 0
+    var incorrectBuzz: SystemSoundID = 0
+    var tempCounter: Double = 0.0
+    
+    var correctMark: String = "✔︎"
+    var wrongMark: String = "✘"
+    var emptyMark: String = "◻️"
+    
+    var answer: Answer = .undetermined
     
     
-    let scoreVCID = "scoreVC"
-    let webVCID = "webVC"
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        canvas()
+        
+        loadGameSounds()
     }
     
     override func viewDidAppear(_ animated: Bool) {
         print("\nviewDidAppear Executed")
         
+
+        switch gameState
+        {
+        case .initialization: //Beginning of game, load welcome screen
+            uploadWelcomeScreen()
+        case .startNewGame:
+          startNewGame()
+        case .viewScore:
+            startNewGame()
+        default:
+            print("")
+        }
+        
+        /*
         if (roundOver() || factHandler.beginningOfGame()) //!factHandler.isGameOver()
         {
             factHandler = FactHandler(factDictionary: factDictionary, gameVars: VariablesConstants())
@@ -90,6 +149,30 @@ class ViewController: UIViewController {
         {
             print("Game is over")
         }
+        */
+    }
+    
+    func startNewGame()
+    {
+        gameState = .startNewGame
+        factHandler = FactHandler(factDictionary: factDictionary, gameVars: VariablesConstants())
+        factHandler.setGameState(isGameOver: false)
+        
+        var scoreLabelText = ""
+        for _ in 1...6
+        {
+            scoreLabelText += emptyMark + ""
+        }
+        scoreLabel.text = scoreLabelText
+        scoreLabel.isHidden = false
+        
+        startRound()
+    }
+    
+    func loadWelcomeScreen()
+    {
+        let myWelcomeVC = self.storyboard?.instantiateViewController(withIdentifier: welcomeVCID) as! WelcomeViewController
+        present(myWelcomeVC, animated: false, completion: nil)
     }
     
     func roundOver() -> Bool
@@ -106,117 +189,128 @@ class ViewController: UIViewController {
     
     func startRound()
     {
+        gameState = .timerOn
+            
         resetAppObjects()
         factHandler.incrementRound()
         
         let factList = factHandler.getStarterFacts()
-        
-        //print("This is Round: \(factHandler.gameVars.numberOfRoundsSoFar)")
+
         
         populateLabelsWithFacts(from: factList)
         
         //Start Timer when question is displayed
         timer = Timer.scheduledTimer(timeInterval: timerInterval, target: self, selector: #selector(ViewController.updateTimer), userInfo: nil, repeats: true)
+        gameState = .timerOn
     }
     
     // Shake to Complete
     override func motionEnded(_ motion: UIEventSubtype, with event: UIEvent?)
     {
-        if event?.subtype == UIEventSubtype.motionShake
+        if gameState == .timerOn
         {
-            clickToCompleteButton.isHidden = true
-            clickToCompleteButton.isUserInteractionEnabled = false
-            
-            timer.invalidate() //This pauses the timer
-            timerLabel.text = getTimeStringFor(seconds: Int(counter))
-            
-            messageLabel.text = "Tap events to learn more"
-            timerLabel.isHidden = true
-            
-            enableAllButtons(false)
-            enableAllFactButtons(true)
-            
-            if (checkResult()) // If result is correct
+            if event?.subtype == UIEventSubtype.motionShake
             {
-                factHandler.incrementScore()
-                displayRoundResult(nextRound: nextRoundSuccess, viewScore: viewScoreSuccessButton)
+                if factHandler.numberOfRoundsSoFar() == factHandler.roundsPerGame()
+                {
+                    gameState = .timerOffViewScore
+                } else {
+                    gameState = .timerOffNextRound
+                }
                 
-            } else // If result is wrong
-            {
-                displayRoundResult(nextRound: nextRoundFail, viewScore: viewScoreFailButton)
+                timer.invalidate() //This pauses the timer
+                timerLabel.text = getTimeStringFor(seconds: Int(counter))
+                
+                messageLabel.text = "Tap events to learn more"
+                timerLabel.isHidden = true
+                
+                enableAllButtons(false)
+                enableAllFactButtons(true)
+                
+                displayRoundResult()
             }
         }
     }
     
-    func shakeToComplete()
+    func updateScoreLabel(with mark: Answer)
     {
-        clickToCompleteButton.isHidden = true
-        clickToCompleteButton.isUserInteractionEnabled = false
-        
-        timer.invalidate() //This pauses the timer
-        timerLabel.text = getTimeStringFor(seconds: Int(counter))
-        
-        messageLabel.text = "Tap events to learn more"
-        timerLabel.isHidden = true
-        
-        enableAllButtons(false)
-        enableAllFactButtons(true)
-        
-        if (checkResult()) // If result is correct
+        var checkMark: String = ""
+        switch mark
         {
-            factHandler.incrementScore()
-            displayRoundResult(nextRound: nextRoundSuccess, viewScore: viewScoreSuccessButton)
-            
-        } else // If result is wrong
-        {
-            displayRoundResult(nextRound: nextRoundFail, viewScore: viewScoreFailButton)
+        case .correct: checkMark = correctMark
+        case .wrong: checkMark = wrongMark
+        case .undetermined: checkMark = emptyMark
         }
+        if let tempScoreLabelText = scoreLabel.text
+        {
+            scoreLabel.text = replaceStringChar(forString: tempScoreLabelText, atIndex: (factHandler.numberOfRoundsSoFar() - 1), with: checkMark)
+        }else
+        {
+            //throw an error
+        }
+        
     }
+    
     
     //Timer function to end the question session when the time alotted for each question runs out
     func updateTimer()
     {
+        
         counter -= timerInterval
         timerLabel.text = getTimeStringFor(seconds: Int(counter))
         
         if counter <= 0.0
         {
+            if factHandler.numberOfRoundsSoFar() == factHandler.roundsPerGame()
+            {
+                gameState = .timerOffViewScore
+            } else {
+                gameState = .timerOffNextRound
+            }
+            
             timer.invalidate() //This pauses the timer
             timerLabel.text = getTimeStringFor(seconds: 0)
-            
-            //Invalidate buttons 
-            //wait about 2 seconds
             
             messageLabel.text = "Tap events to learn more"
             timerLabel.isHidden = true
             
-            //check if correct or wrong
-            
             enableAllButtons(false)
             enableAllFactButtons(true)
             
-            if (checkResult()) // If result is correct
-            {
-                factHandler.incrementScore()
-                displayRoundResult(nextRound: nextRoundSuccess, viewScore: viewScoreSuccessButton)
-                
-            } else // If result is wrong
-            {
-                displayRoundResult(nextRound: nextRoundFail, viewScore: viewScoreFailButton)
-            }
+            displayRoundResult()
         }
     }
     
-    func displayRoundResult(nextRound: UIButton, viewScore: UIButton)
+    func displayRoundResult()
     {
-        if factHandler.numberOfRoundsSoFar() < factHandler.roundsPerGame()
+        if(checkResult()) //result is correct
         {
-            nextRound.isUserInteractionEnabled = true
-            nextRound.isHidden = false
-        } else
+            playCorrectAnswerSound()
+            factHandler.incrementScore()
+            updateScoreLabel(with: .correct)
+            
+            if factHandler.numberOfRoundsSoFar() < factHandler.roundsPerGame()
+            {
+                nextRoundSuccess.isUserInteractionEnabled = true
+                nextRoundSuccess.isHidden = false
+            } else
+            {
+                viewScoreSuccessButton.isUserInteractionEnabled = true
+                viewScoreSuccessButton.isHidden = false
+            }
+        }else
         {
-            viewScore.isUserInteractionEnabled = true
-            viewScore.isHidden = false
+            playWrongAnswerSound()
+            updateScoreLabel(with: .wrong)
+            if factHandler.numberOfRoundsSoFar() < factHandler.roundsPerGame()
+            {
+                nextRoundFail.isUserInteractionEnabled = true
+                nextRoundFail.isHidden = false
+            } else
+            {
+                viewScoreFailButton.isUserInteractionEnabled = true
+                viewScoreFailButton.isHidden = false
+            }
         }
     }
     
@@ -228,11 +322,7 @@ class ViewController: UIViewController {
         insertFactInto(label: factLabel3, fact: factList[2])
         insertFactInto(label: factLabel4, fact: factList[3])
     }
-    
-    func canvas()
-    {
-        
-    }
+
     
     func exchangeLabelFactsFor(label1: UILabel, label2: UILabel)
     {
@@ -245,9 +335,6 @@ class ViewController: UIViewController {
     {
         label.text = fact
     }
-    
-   
-    
     
     @IBAction func buttonClickEvent(_ sender: UIButton)
     {
@@ -278,14 +365,37 @@ class ViewController: UIViewController {
             displayWebForm(url: fetchUrlForFact(inLabel: factLabel4))
             
         case nextRoundSuccess, nextRoundFail: startRound()
-            
-        //case clickToCompleteButton:
-        //    shakeToComplete()
-            
+
         case viewScoreSuccessButton, viewScoreFailButton: displayScore()
-            
+        case newGameButton:
+            dismissWelcomeScreen()
+            startNewGame()
+
         default: print("The default statement in func moveFact() has been executed. This should not be happening. Fix error!")
         }
+    }
+    
+    func dismissWelcomeScreen()
+    {
+        splashImageView.isHidden = true
+        newGameButton.isHidden = true
+        rulesButton.isHidden = true
+        
+        newGameButton.isUserInteractionEnabled = false
+        rulesButton.isUserInteractionEnabled = false
+    }
+    
+    func uploadWelcomeScreen()
+    {
+        gameState = .welcomeScreen
+        
+        scoreLabel.isHidden = true
+        splashImageView.isHidden = false
+        newGameButton.isHidden = false
+        rulesButton.isHidden = false
+        
+        newGameButton.isUserInteractionEnabled = true
+        rulesButton.isUserInteractionEnabled = true
     }
     
     func fetchUrlForFact(inLabel label: UILabel) -> String
@@ -297,6 +407,7 @@ class ViewController: UIViewController {
     
     func displayWebForm(url: String)
     {
+        gameState = .webView
         webURLGlobal = url
         
         let myWebVC = self.storyboard?.instantiateViewController(withIdentifier: webVCID) as! WebViewController
@@ -306,6 +417,7 @@ class ViewController: UIViewController {
     
     func displayScore()
     {
+        gameState = .viewScore
         factHandler.setGameState(isGameOver: true)
         let myScoreVC = self.storyboard?.instantiateViewController(withIdentifier: scoreVCID) as! PlayAgainController
         present(myScoreVC, animated: true, completion: self.resetAppObjects)
@@ -339,7 +451,6 @@ class ViewController: UIViewController {
     }
     
     
-
     func getDates(forKeyArray keyArray: [String]) -> [String]
     {
         var dateMMDDYYYY: String = ""
@@ -355,10 +466,7 @@ class ViewController: UIViewController {
         
         return dateArray
     }
-    
-    
-
-    
+  
     func getFactFromLabel(label: UILabel) -> String
     {
         if let fact = label.text
@@ -404,9 +512,6 @@ class ViewController: UIViewController {
         let dateArray = getDates(forKeyArray: factKeys)
         return areDatesInAscendingOrder(dates: dateArray)
     }
-    
-    ////////////////////////////////////////////////////////////
-    
     
     
     func enableAllButtons(_ state: Bool) {
@@ -474,14 +579,43 @@ class ViewController: UIViewController {
         viewScoreSuccessButton.isUserInteractionEnabled = false
         viewScoreFailButton.isUserInteractionEnabled = false
         
-        clickToCompleteButton.isUserInteractionEnabled = true
-        clickToCompleteButton.isHidden = false
-        
         timerLabel.text = getTimeStringFor(seconds: secPerQuestion)
         timerLabel.isHidden = false
         messageLabel.text = "Shake to complete"
         
         counter = Double(secPerQuestion)
     }
+    
+    func loadGameSounds()
+    {
+        loadCorrectAnswerSound()
+        loadWrongAnswerSound()
+    }
+    
+    func  loadCorrectAnswerSound()    {
+        //GameStartSound
+        let pathToSoundFile = Bundle.main.path(forResource: "CorrectDing", ofType: "wav")
+        let soundURL = URL(fileURLWithPath: pathToSoundFile!)
+        AudioServicesCreateSystemSoundID(soundURL as CFURL, &correctDing)
+        
+    } // End  func loadGameStartSound()
+    
+    func  loadWrongAnswerSound()   {
+        //GameStartSound
+        let pathToSoundFile = Bundle.main.path(forResource: "IncorrectBuzz", ofType: "wav")
+        let soundURL = URL(fileURLWithPath: pathToSoundFile!)
+        AudioServicesCreateSystemSoundID(soundURL as CFURL, &incorrectBuzz)
+        
+    } // End  func loadGameStartSound()
+    
+    func playCorrectAnswerSound() {
+        AudioServicesPlaySystemSound(correctDing)
+        
+    } // End func playGameStartSound()
+    
+    func playWrongAnswerSound() {
+        AudioServicesPlaySystemSound(incorrectBuzz)
+        
+    } // End func playGameStartSound()
 }
 

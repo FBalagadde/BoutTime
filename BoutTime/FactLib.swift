@@ -8,7 +8,7 @@
 
 import Foundation
 
-var webURLGlobal: String = ""
+var webURLGlobal: String = "https://www.google.com/"
 
 struct VariablesConstants
 {

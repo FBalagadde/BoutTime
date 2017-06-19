@@ -34,6 +34,10 @@ class FactHandler
         gameVars.numberOfRoundsSoFar += 1
     }
     
+    func resetGame() {
+        gameVars.numberOfRoundsSoFar = 0
+    }
+    
     func beginningOfGame() -> Bool
     {
         return gameVars.numberOfRoundsSoFar == 0
