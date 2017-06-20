@@ -10,6 +10,7 @@ import Foundation
 import GameKit
 import UIKit
 
+/// FactHandler contains a class which implements functionality for manipulating the facts from the database.
 class FactHandler
 {
     var factSet: [String: (factDate: String?, factURL: String?)]

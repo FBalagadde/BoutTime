@@ -10,6 +10,14 @@ import UIKit
 import AudioToolbox
 import GameKit
 
+
+/// The ViewController file handles manipulations associated with the graphical user interface.
+/// FactHandler contains a class which implements functionality for manipulating the facts from the database.
+/// GlobalConstantsVariables: The fact database is stored in dictionary within a Struct in a file called 
+/// GlobalConstantsVariables, which also stores other global variables such as IDs of the secondary 
+/// viewController classes, enumerated variables for errors and game states.
+/// Utility methods for support functions such as date comparisons have been moved into a separate file called UtilityFunctions
+
 //Specify the Fact Dictionary for this Game
 let factDictionary = FactSet().worldChangingEvents
 

@@ -8,8 +8,11 @@
 
 import Foundation
 
+/// GlobalConstantsVariables: The fact database is stored in dictionary within a Struct in a file called
+/// GlobalConstantsVariables, which also stores other global variables such as IDs of the secondary
+/// viewController classes, enumerated variables for errors and game states.
 
-
+/// Game-specific constants and variables
 struct VariablesConstants
 {
     let roundsPerGame: Int = 6
@@ -19,6 +22,7 @@ struct VariablesConstants
     var gameOver = false
 }
 
+/// Error types
 enum FactSetError: Error
 {
     case invalidFact(description: String)
@@ -28,6 +32,7 @@ enum FactSetError: Error
     case invalidFactFromLabel(description: String)
 }
 
+/// Game-state values
 enum GameStates: String
 {
     case idle
@@ -41,6 +46,7 @@ enum GameStates: String
     case startNewGame
 }
 
+/// Answer types
 enum Answer: String
 {
     case correct
@@ -48,7 +54,7 @@ enum Answer: String
     case undetermined
 }
 
-
+/// Modal ViewController ID's
 let scoreVCID = "scoreVC"
 let webVCID = "webVC"
 let reloadVCID = "reloadVC"

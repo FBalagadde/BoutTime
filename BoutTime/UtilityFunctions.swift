@@ -8,7 +8,7 @@
 
 import Foundation
 
-//Utility Functions utilized within the project
+/// UtilityFunctions: Utility methods for support functions such as date comparisons have been moved into this file.
 
 //Convert time in seconds to m:ss format
 func getTimeStringFor(seconds: Int) -> String
