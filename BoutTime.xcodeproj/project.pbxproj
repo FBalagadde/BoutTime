@@ -13,6 +13,7 @@
 		370C5F221EF5DDA10049F930 /* CorrectDing.wav in Resources */ = {isa = PBXBuildFile; fileRef = 370C5F211EF5DDA10049F930 /* CorrectDing.wav */; };
 		370C5F241EF5DDC20049F930 /* IncorrectBuzz.wav in Resources */ = {isa = PBXBuildFile; fileRef = 370C5F231EF5DDC20049F930 /* IncorrectBuzz.wav */; };
 		370F5F271EF1AFD000806917 /* PlayAgainController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370F5F261EF1AFD000806917 /* PlayAgainController.swift */; };
+		37138EF21EF8D8D100F30604 /* RulesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37138EF11EF8D8D100F30604 /* RulesViewController.swift */; };
 		374323B61EEF2E7800CD0965 /* FactHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374323B51EEF2E7800CD0965 /* FactHandler.swift */; };
 		37C208A51EEEF6B60039F89A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C208A41EEEF6B60039F89A /* AppDelegate.swift */; };
 		37C208A71EEEF6B60039F89A /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C208A61EEEF6B60039F89A /* ViewController.swift */; };
@@ -21,8 +22,6 @@
 		37C208AF1EEEF6B60039F89A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 37C208AD1EEEF6B60039F89A /* LaunchScreen.storyboard */; };
 		37C208BA1EEEF6B60039F89A /* BoutTimeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C208B91EEEF6B60039F89A /* BoutTimeTests.swift */; };
 		37C208C51EEEF6B60039F89A /* BoutTimeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C208C41EEEF6B60039F89A /* BoutTimeUITests.swift */; };
-		37DDE3BC1EF6A7F60012D144 /* WelcomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DDE3BB1EF6A7F60012D144 /* WelcomeViewController.swift */; };
-		37DDE3BE1EF6AA570012D144 /* ReloadViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DDE3BD1EF6AA570012D144 /* ReloadViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +48,7 @@
 		370C5F211EF5DDA10049F930 /* CorrectDing.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = CorrectDing.wav; sourceTree = "<group>"; };
 		370C5F231EF5DDC20049F930 /* IncorrectBuzz.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = IncorrectBuzz.wav; sourceTree = "<group>"; };
 		370F5F261EF1AFD000806917 /* PlayAgainController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayAgainController.swift; sourceTree = "<group>"; };
+		37138EF11EF8D8D100F30604 /* RulesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RulesViewController.swift; sourceTree = "<group>"; };
 		374323B51EEF2E7800CD0965 /* FactHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FactHandler.swift; sourceTree = "<group>"; };
 		37C208A11EEEF6B60039F89A /* BoutTime.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BoutTime.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37C208A41EEEF6B60039F89A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -63,8 +63,6 @@
 		37C208C01EEEF6B60039F89A /* BoutTimeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BoutTimeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		37C208C41EEEF6B60039F89A /* BoutTimeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoutTimeUITests.swift; sourceTree = "<group>"; };
 		37C208C61EEEF6B60039F89A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		37DDE3BB1EF6A7F60012D144 /* WelcomeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WelcomeViewController.swift; sourceTree = "<group>"; };
-		37DDE3BD1EF6AA570012D144 /* ReloadViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReloadViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -121,15 +119,14 @@
 				3707296C1EF45BD7001CBCE5 /* FactLib.swift */,
 				370F5F261EF1AFD000806917 /* PlayAgainController.swift */,
 				3707296E1EF48699001CBCE5 /* UtilityFunctions.swift */,
+				370729701EF48C22001CBCE5 /* WebViewController.swift */,
 				37C208A81EEEF6B60039F89A /* Main.storyboard */,
 				37C208AB1EEEF6B60039F89A /* Assets.xcassets */,
 				37C208AD1EEEF6B60039F89A /* LaunchScreen.storyboard */,
 				37C208B01EEEF6B60039F89A /* Info.plist */,
-				370729701EF48C22001CBCE5 /* WebViewController.swift */,
 				370C5F231EF5DDC20049F930 /* IncorrectBuzz.wav */,
 				370C5F211EF5DDA10049F930 /* CorrectDing.wav */,
-				37DDE3BB1EF6A7F60012D144 /* WelcomeViewController.swift */,
-				37DDE3BD1EF6AA570012D144 /* ReloadViewController.swift */,
+				37138EF11EF8D8D100F30604 /* RulesViewController.swift */,
 			);
 			path = BoutTime;
 			sourceTree = "<group>";
@@ -292,13 +289,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				3707296F1EF48699001CBCE5 /* UtilityFunctions.swift in Sources */,
-				37DDE3BC1EF6A7F60012D144 /* WelcomeViewController.swift in Sources */,
 				374323B61EEF2E7800CD0965 /* FactHandler.swift in Sources */,
 				3707296D1EF45BD7001CBCE5 /* FactLib.swift in Sources */,
-				37DDE3BE1EF6AA570012D144 /* ReloadViewController.swift in Sources */,
 				37C208A71EEEF6B60039F89A /* ViewController.swift in Sources */,
 				370729711EF48C22001CBCE5 /* WebViewController.swift in Sources */,
 				370F5F271EF1AFD000806917 /* PlayAgainController.swift in Sources */,
+				37138EF21EF8D8D100F30604 /* RulesViewController.swift in Sources */,
 				37C208A51EEEF6B60039F89A /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

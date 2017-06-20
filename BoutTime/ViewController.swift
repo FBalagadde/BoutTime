@@ -117,14 +117,18 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        
         loadGameSounds()
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
     }
     
     override func viewDidAppear(_ animated: Bool) {
         print("\nviewDidAppear Executed")
         
-
+        //When game appears, perform different functions depending on the state of the game
         switch gameState
         {
         case .initialization: //Beginning of game, load welcome screen
@@ -136,20 +140,6 @@ class ViewController: UIViewController {
         default:
             print("")
         }
-        
-        /*
-        if (roundOver() || factHandler.beginningOfGame()) //!factHandler.isGameOver()
-        {
-            factHandler = FactHandler(factDictionary: factDictionary, gameVars: VariablesConstants())
-            factHandler.setGameState(isGameOver: false)
-            startRound()
-            
-            print("Game not over")
-        }else
-        {
-            print("Game is over")
-        }
-        */
     }
     
     func startNewGame()
@@ -169,18 +159,6 @@ class ViewController: UIViewController {
         startRound()
     }
     
-    func loadWelcomeScreen()
-    {
-        let myWelcomeVC = self.storyboard?.instantiateViewController(withIdentifier: welcomeVCID) as! WelcomeViewController
-        present(myWelcomeVC, animated: false, completion: nil)
-    }
-    
-    func roundOver() -> Bool
-    {
-        return nextRoundFail.isHidden && nextRoundSuccess.isHidden && viewScoreFailButton.isHidden && viewScoreSuccessButton.isHidden
-    }
-    
-   
     
     func initializeGame()
     {
@@ -194,10 +172,19 @@ class ViewController: UIViewController {
         resetAppObjects()
         factHandler.incrementRound()
         
-        let factList = factHandler.getStarterFacts()
-
-        
-        populateLabelsWithFacts(from: factList)
+        do
+        {
+            let factList = try factHandler.getStarterFacts()
+            populateLabelsWithFacts(from: factList)
+        }catch FactSetError.invalidFact(let description){
+            print("Error: \(description)")
+        }catch FactSetError.invalidDate(let description){
+            print("Error: \(description)")
+        }catch FactSetError.invalidDateFormat(let description){
+            print("Error: \(description)")
+        }catch let description {
+            print("Error: \(description)")
+        }
         
         //Start Timer when question is displayed
         timer = Timer.scheduledTimer(timeInterval: timerInterval, target: self, selector: #selector(ViewController.updateTimer), userInfo: nil, repeats: true)
@@ -207,6 +194,7 @@ class ViewController: UIViewController {
     // Shake to Complete
     override func motionEnded(_ motion: UIEventSubtype, with event: UIEvent?)
     {
+        //Shake guesture is only active when the timer is on
         if gameState == .timerOn
         {
             if event?.subtype == UIEventSubtype.motionShake
@@ -246,16 +234,14 @@ class ViewController: UIViewController {
             scoreLabel.text = replaceStringChar(forString: tempScoreLabelText, atIndex: (factHandler.numberOfRoundsSoFar() - 1), with: checkMark)
         }else
         {
-            //throw an error
+            print("Could not update score")
         }
-        
     }
     
     
-    //Timer function to end the question session when the time alotted for each question runs out
+    //Timer function to end the round when the time alotted time runs out
     func updateTimer()
     {
-        
         counter -= timerInterval
         timerLabel.text = getTimeStringFor(seconds: Int(counter))
         
@@ -400,8 +386,18 @@ class ViewController: UIViewController {
     
     func fetchUrlForFact(inLabel label: UILabel) -> String
     {
-        let fact: String = getFactFromLabel(label: label)
-        return getURLString(forKey: fact)
+        var fact = ""
+        var url = ""
+        do {
+            fact = try getFactFromLabel(label: label)
+            url = try getURLString(forKey: fact)
+           
+        }catch FactSetError.invalidFactFromLabel(let description){
+            print("Error: \(description)")
+        }catch let error {
+            print("Error: \(error)")
+        }
+        return url
     }
    
     
@@ -422,31 +418,36 @@ class ViewController: UIViewController {
         let myScoreVC = self.storyboard?.instantiateViewController(withIdentifier: scoreVCID) as! PlayAgainController
         present(myScoreVC, animated: true, completion: self.resetAppObjects)
     }
-    
  
-    func getURLString(forKey key: String) -> String
+    func getURLString(forKey key: String) throws -> String
     {
-        if let url = factHandler.factSet[key]?.factURL //factHandler.factSet.facts[key]?.factDate
-        {
-            //make sure URL is not an empty string or else throw error
-            return url
-            
-        }else{
-            // FIXME: send an error
-            return "empty string"
+        guard let factKey = factHandler.factSet[key] else {
+            throw FactSetError.invalidFact(description: "Invalid fact for key: \(key)")
         }
+        guard let url = factKey.factURL else
+        {
+            throw FactSetError.invalidURL(description: "Invalid URL value for key: \(key)")
+        }
+        return url
     }
     
-    func getDateString(forKey key: String) -> String
+    func getDateString(forKey key: String) throws -> String
     {
-        if let date = factHandler.factSet[key]?.factDate //factHandler.factSet.facts[key]?.factDate
+        guard let factKey = factHandler.factSet[key] else {
+            throw FactSetError.invalidFact(description: "Invalid fact for key: \(key)")
+        }
+        
+        guard let date = factKey.factDate else
         {
-            //print(date)
+            throw FactSetError.invalidDate(description: "Invalid date value for key: \(key)")
+        }
+        
+        if !correctFormatFor(dateString: date)
+        {
+            throw FactSetError.invalidDateFormat(description: "Invalid date format for key: \(key)")
+        } else
+        {
             return date
-            
-        }else{
-            // FIXME: send an error
-            return "empty string"
         }
     }
     
@@ -459,24 +460,29 @@ class ViewController: UIViewController {
         
         for key in keyArray
         {
-            date = getDateString(forKey: key)
-            dateMMDDYYYY = changeDateToYYYYMMDD(fromMMDDYYY: date)
-            dateArray.append(dateMMDDYYYY)
+            do
+            {
+                date = try getDateString(forKey: key)
+                dateMMDDYYYY = changeDateToYYYYMMDD(fromMMDDYYY: date)
+                dateArray.append(dateMMDDYYYY)
+            }catch FactSetError.invalidDate(let description) {
+                print("Error: \(description)")
+            } catch let error {
+                print("Error: \(error)")
+            }
         }
         
         return dateArray
     }
   
-    func getFactFromLabel(label: UILabel) -> String
+    func getFactFromLabel(label: UILabel) throws -> String
     {
-        if let fact = label.text
-        {
-            return fact
-        }else {
-            //throw error
-            return ""
+        guard let fact = label.text else {
+            throw FactSetError.invalidFactFromLabel(description: "Invalid fact from Label")
         }
+        return fact
     }
+    
     
     /////////////////////////////////
     //get keys from labels -> [keys] : String
@@ -498,8 +504,14 @@ class ViewController: UIViewController {
             }
             
             //put this in a try catch statement
-            fact = getFactFromLabel(label: label)
-            gameFactKeys.append(fact)
+            do {
+                fact = try getFactFromLabel(label: label)
+                gameFactKeys.append(fact)
+            } catch FactSetError.invalidFactFromLabel(let description) {
+                print("Error: \(description)")
+            } catch let error {
+                print("Error: \(error)")
+            }
         }
         
         return gameFactKeys
@@ -539,11 +551,6 @@ class ViewController: UIViewController {
         fact4Button.isUserInteractionEnabled   = state
     }
    
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
     
     func resetAppObjects()
     {

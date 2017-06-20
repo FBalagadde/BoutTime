@@ -19,9 +19,18 @@ struct VariablesConstants
     var gameOver = false
 }
 
+enum FactSetError: Error
+{
+    case invalidFact(description: String)
+    case invalidDate(description: String)
+    case invalidURL(description: String)
+    case invalidDateFormat(description: String)
+    case invalidFactFromLabel(description: String)
+}
+
 struct FactSet
 {
-    let famousBirthdays: [String: (factDate: String, factURL: String)] =
+    let famousBirthdays: [String: (factDate: String?, factURL: String?)] =
         [
             "Diego Maradona":           ("10-30-1960", "https://en.wikipedia.org/wiki/Diego_Maradona"),
             "Pele":                     ("10-23-1940", "https://en.wikipedia.org/wiki/Pel%C3%A9"),

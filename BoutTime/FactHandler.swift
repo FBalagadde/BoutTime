@@ -8,14 +8,15 @@
 
 import Foundation
 import GameKit
+import UIKit
 
 class FactHandler
 {
-    var factSet: [String: (factDate: String, factURL: String)]
+    var factSet: [String: (factDate: String?, factURL: String?)]
     var gameVars: VariablesConstants = VariablesConstants()
     var randomFactKey: String = ""
     
-    init(factDictionary factSet: [String: (factDate: String, factURL: String)], gameVars: VariablesConstants){
+    init(factDictionary factSet: [String: (factDate: String?, factURL: String?)], gameVars: VariablesConstants){
         
         self.factSet = factSet
         self.gameVars = gameVars
@@ -61,15 +62,15 @@ class FactHandler
     // Invalid factSet // tere is no fact with a propperly formatted date
     // The URL error is not a show stopper so it will be handled in the app itself
     /// input date string format: MM-DD-YYYY
-    func getStarterFacts() -> [String]
+    func getStarterFacts() throws -> [String]
     {
         var indexOfSelectFact: Int = 0
         var checkedKeys: [String] = []
         var selectedKeys: [String] = []
         
-        // search through the database and fetch 4 facts. 
-        // If a fact is faulty, skip it and get the next one [date does not exist]
-        // Fulty: If the date does not exist or if the date is not properly formatted
+        // search through the database and fetch 4 random facts.
+        // If a fact is faulty (e.g. date does not exist), skip it and get the next one
+        // Faulty means: If the date does not exist or if the date is not properly formatted
         // Dont worry about the URL string at this point
         
         //Possible errors
@@ -90,20 +91,32 @@ class FactHandler
             checkedKeys.append(randomFactKey) //include the fact key in the gameQuestions array
             
             // If the date string exists, insert it into the return array
-            if let factDate = factSet[randomFactKey]?.factDate
+            guard let factKey = factSet[randomFactKey] else
             {
-                //check if the date is in teh correct format
-                if correctFormatFor(dateString: factDate)
-                {
-                    selectedKeys.append(randomFactKey)
-                    //Export only keys with valid dates
-                    //keys with invalid URLs may be exported because this is not mandatory for the game to be played
-                }
+                throw FactSetError.invalidFact(description: "Invalid fact for key: \(randomFactKey) in function getStarterFacts")
             }
+            
+            guard let factDate = factKey.factDate else
+            {
+                throw FactSetError.invalidDate(description: "Invalid date value for key: \(randomFactKey)")
+            }
+            
+            if !correctFormatFor(dateString: factDate)
+            {
+                throw FactSetError.invalidDateFormat(description: "Invalid date format for key: \(randomFactKey)")
+            }
+            
+            //Export only keys with valid dates
+            //keys with invalid URLs may be exported because this is not mandatory for the game to be played
+            selectedKeys.append(randomFactKey)
+            
         } while (selectedKeys.count < gameVars.numberOfFactsPerRound && checkedKeys.count < factSet.count)
         
-        // FIXME: 
         // IF you exit this loop and size of seletFactArray < 4, Throw error and exit
+        if selectedKeys.count < (gameVars.numberOfFactsPerRound)
+        {
+            throw FactSetError.invalidFact(description: "There arent enough facts with valid dates to complete a game round")
+        }
  
         return selectedKeys
     }

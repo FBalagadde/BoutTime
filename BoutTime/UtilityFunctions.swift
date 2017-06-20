@@ -8,6 +8,9 @@
 
 import Foundation
 
+//Utility Functions utilized within the project
+
+//Convert time in seconds to m:ss format
 func getTimeStringFor(seconds: Int) -> String
 {
     let (timerMins, timerSecs) = (seconds/60, seconds%60)
@@ -22,11 +25,10 @@ func getTimeStringFor(seconds: Int) -> String
     return "\(timerMins):" + timerSecString
 }
 
+//Is date X before date Y: Make sure X and Y are in correct format before calling this function
 func isXLessThanY(x: [String], y: [String]) -> Bool
 {
-    //check if date strings formatted correctly
-    //return error is not
-    if Int(y[0])! > Int(x[0])! //Here we do a force unwrap because we have checked tha tthe date format is authentic
+    if Int(y[0])! > Int(x[0])! //Here we do a force unwrap because this function is called after we have checked that the date format is authentic
     {
         return true
     }else if Int(y[0])! < Int(x[0])! {
@@ -45,6 +47,7 @@ func isXLessThanY(x: [String], y: [String]) -> Bool
     }
 }
 
+//Replace character in string
 func replaceStringChar(forString myString: String, atIndex index: Int, with newChar: String) -> String
 {
     var newString = ""
@@ -64,28 +67,7 @@ func replaceStringChar(forString myString: String, atIndex index: Int, with newC
 } // End func replaceStringChar
 
 
-
-// Utility Function for tokenizing delimited strings
-func getStringTokensOf(string inputString: String, delimitChar: String) -> [String]{
-    
-    var tokens: [String] = []
-    var tempString = ""
-    
-    for letter in inputString.characters {
-        
-        switch String(letter) {
-        case String(delimitChar):
-            tokens.append(tempString)
-            tempString = ""
-        default:
-            tempString += String(letter)
-        }
-    }
-    tokens.append(tempString)
-    return tokens
-} //end func getStringTokensOf
-
-
+//Function to check whether an array of string dates is in correct order
 func areDatesInAscendingOrder(dates: [String]) -> Bool
 {
     if dates.count == 2
@@ -105,6 +87,8 @@ func areDatesInAscendingOrder(dates: [String]) -> Bool
     }
 }
 
+
+//Support function for checking whether date X is before date Y
 func isXBeforeY(dateX: String, dateY: String) -> Bool
 {
     // if not correctFormatFor(dateString: dateString1), return error
@@ -171,3 +155,23 @@ func correctFormatFor(dateString: String) -> Bool
     
     return true
 }
+
+// Utility Function for tokenizing delimited strings
+func getStringTokensOf(string inputString: String, delimitChar: String) -> [String]{
+    
+    var tokens: [String] = []
+    var tempString = ""
+    
+    for letter in inputString.characters {
+        
+        switch String(letter) {
+        case String(delimitChar):
+            tokens.append(tempString)
+            tempString = ""
+        default:
+            tempString += String(letter)
+        }
+    }
+    tokens.append(tempString)
+    return tokens
+} //end func getStringTokensOf

@@ -1,22 +1,22 @@
 //
-//  WelcomeViewController.swift
+//  RulesViewController.swift
 //  BoutTime
 //
-//  Created by Frederick Balagadde on 6/18/17.
+//  Created by Frederick Balagadde on 6/20/17.
 //  Copyright © 2017 Frederick Balagadde. All rights reserved.
 //
 
 import UIKit
 
-class WelcomeViewController: UIViewController {
+class RulesViewController: UIViewController {
 
-    @IBOutlet weak var newGameButton: UIButton!
-    @IBOutlet weak var resumeButton: UIButton!
-    @IBOutlet weak var rulesButton: UIButton!
-    
+    @IBOutlet weak var backButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        let cornerRadius: CGFloat = 5
+        backButton.layer.cornerRadius = cornerRadius
 
         // Do any additional setup after loading the view.
     }
@@ -26,18 +26,9 @@ class WelcomeViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-   
-    @IBAction func newGameClickEvent(_ sender: Any) {
-        gameState = .startNewGame
-         dismiss(animated: true, completion: nil)
-    }
-    
-    @IBAction func resumeClickEvent(_ sender: Any) {
-         dismiss(animated: true, completion: nil)
-    }
-    
-    @IBAction func rulesButtonClick(_ sender: Any) {
-         dismiss(animated: true, completion: nil)
+
+    @IBAction func backButtonAction(_ sender: Any) {
+        dismiss(animated: true, completion: nil)
     }
     /*
     // MARK: - Navigation
