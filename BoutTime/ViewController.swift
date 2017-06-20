@@ -11,42 +11,13 @@ import AudioToolbox
 import GameKit
 
 //Specify the Fact Dictionary for this Game
-let factDictionary = FactSet().famousBirthdays
+let factDictionary = FactSet().worldChangingEvents
 
 var factHandler = FactHandler(factDictionary: factDictionary, gameVars: VariablesConstants())
-var secPerQuestion: Int = 60
-var counter: Double = 0
-
-let scoreVCID = "scoreVC"
-let webVCID = "webVC"
-let welcomeVCID = "welcomeVC"
-let reloadVCID = "reloadVC"
-
-
-enum GameStates: String
-{
-    case idle
-    case initialization
-    case timerOn
-    case timerOffNextRound
-    case timerOffViewScore
-    case viewScore
-    case webView
-    case resuming
-    case welcomeScreen
-    case startNewGame
-    case homeButtonWasPressed
-    case applicationReturn
-}
-
-enum Answer: String
-{
-    case correct
-    case wrong
-    case undetermined
-}
 
 var gameState: GameStates = .initialization
+var counter: Double = 0
+let secPerQuestion: Int = 60
 
 class ViewController: UIViewController {
 

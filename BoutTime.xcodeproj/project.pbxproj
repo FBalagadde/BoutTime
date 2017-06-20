@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3707296D1EF45BD7001CBCE5 /* FactLib.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3707296C1EF45BD7001CBCE5 /* FactLib.swift */; };
+		3707296D1EF45BD7001CBCE5 /* GlobalConstantsVariables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3707296C1EF45BD7001CBCE5 /* GlobalConstantsVariables.swift */; };
 		3707296F1EF48699001CBCE5 /* UtilityFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3707296E1EF48699001CBCE5 /* UtilityFunctions.swift */; };
 		370729711EF48C22001CBCE5 /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370729701EF48C22001CBCE5 /* WebViewController.swift */; };
 		370C5F221EF5DDA10049F930 /* CorrectDing.wav in Resources */ = {isa = PBXBuildFile; fileRef = 370C5F211EF5DDA10049F930 /* CorrectDing.wav */; };
@@ -42,7 +42,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		3707296C1EF45BD7001CBCE5 /* FactLib.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FactLib.swift; sourceTree = "<group>"; };
+		3707296C1EF45BD7001CBCE5 /* GlobalConstantsVariables.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GlobalConstantsVariables.swift; sourceTree = "<group>"; };
 		3707296E1EF48699001CBCE5 /* UtilityFunctions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UtilityFunctions.swift; sourceTree = "<group>"; };
 		370729701EF48C22001CBCE5 /* WebViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebViewController.swift; sourceTree = "<group>"; };
 		370C5F211EF5DDA10049F930 /* CorrectDing.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = CorrectDing.wav; sourceTree = "<group>"; };
@@ -116,17 +116,17 @@
 				37C208A41EEEF6B60039F89A /* AppDelegate.swift */,
 				37C208A61EEEF6B60039F89A /* ViewController.swift */,
 				374323B51EEF2E7800CD0965 /* FactHandler.swift */,
-				3707296C1EF45BD7001CBCE5 /* FactLib.swift */,
+				3707296C1EF45BD7001CBCE5 /* GlobalConstantsVariables.swift */,
 				370F5F261EF1AFD000806917 /* PlayAgainController.swift */,
 				3707296E1EF48699001CBCE5 /* UtilityFunctions.swift */,
 				370729701EF48C22001CBCE5 /* WebViewController.swift */,
+				37138EF11EF8D8D100F30604 /* RulesViewController.swift */,
 				37C208A81EEEF6B60039F89A /* Main.storyboard */,
 				37C208AB1EEEF6B60039F89A /* Assets.xcassets */,
 				37C208AD1EEEF6B60039F89A /* LaunchScreen.storyboard */,
 				37C208B01EEEF6B60039F89A /* Info.plist */,
 				370C5F231EF5DDC20049F930 /* IncorrectBuzz.wav */,
 				370C5F211EF5DDA10049F930 /* CorrectDing.wav */,
-				37138EF11EF8D8D100F30604 /* RulesViewController.swift */,
 			);
 			path = BoutTime;
 			sourceTree = "<group>";
@@ -290,7 +290,7 @@
 			files = (
 				3707296F1EF48699001CBCE5 /* UtilityFunctions.swift in Sources */,
 				374323B61EEF2E7800CD0965 /* FactHandler.swift in Sources */,
-				3707296D1EF45BD7001CBCE5 /* FactLib.swift in Sources */,
+				3707296D1EF45BD7001CBCE5 /* GlobalConstantsVariables.swift in Sources */,
 				37C208A71EEEF6B60039F89A /* ViewController.swift in Sources */,
 				370729711EF48C22001CBCE5 /* WebViewController.swift in Sources */,
 				370F5F271EF1AFD000806917 /* PlayAgainController.swift in Sources */,

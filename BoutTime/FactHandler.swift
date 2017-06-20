@@ -101,14 +101,17 @@ class FactHandler
                 throw FactSetError.invalidDate(description: "Invalid date value for key: \(randomFactKey)")
             }
             
-            if !correctFormatFor(dateString: factDate)
+            //Export only keys with valid dates to avoid game interruption
+            //keys with invalid URLs may be exported because this is not mandatory for the game to be played
+            if correctFormatFor(dateString: factDate)
             {
-                throw FactSetError.invalidDateFormat(description: "Invalid date format for key: \(randomFactKey)")
+                selectedKeys.append(randomFactKey)
+            } else {
+                print("Invalid date format for key: \(randomFactKey)")
             }
             
-            //Export only keys with valid dates
-            //keys with invalid URLs may be exported because this is not mandatory for the game to be played
-            selectedKeys.append(randomFactKey)
+           
+            
             
         } while (selectedKeys.count < gameVars.numberOfFactsPerRound && checkedKeys.count < factSet.count)
         

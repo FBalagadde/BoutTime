@@ -24,18 +24,10 @@ class PlayAgainController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    /*
-    override func viewDidAppear(_ animated: Bool)
-    {
-        self.viewDidAppear(animated)
-        finalScoreLabel.text = "5/6"
-    }
-    */
-    
+
     @IBAction func playAgain(_ sender: Any)
     {
-        //factHandler = FactHandler(factSet: FactSet())
-        dismiss(animated: true, completion: nil)
+                dismiss(animated: true, completion: nil)
     }
     
 
